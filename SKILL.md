@@ -51,7 +51,7 @@ One transaction through `createLaunch`:
 4. Opens a Uniswap v4 pool (`fee = 0`, `tickSpacing = 200`) against ETH or USDC.
 5. Seeds **single-sided** liquidity (launch token only) at about **$4,000** opening FDV.
 6. Locks that position in the hook (no LP withdraw, no extra LP from others).
-7. Charges a **1%** swap fee in the paired asset, split **30% creator / 70% platform**.
+7. Charges a **1%** swap fee in the paired asset, split **70% creator / 30% platform**.
 8. Optional opening anti-snipe (defaults): total fee starts at **99%** and decays to **1%** over **20 seconds**.
 9. Requires the new token address last 12 bits to match on-chain `tokenSuffix`.
 
@@ -140,7 +140,7 @@ Reply with:
 - predicted token address
 - salt as `0x` + 64 hex chars
 - opening size: ~$4k FDV, 1B supply, locked single-sided v4 LP
-- fee: 1% swap, 30% creator / 70% platform
+- fee: 1% swap, 70% creator / 30% platform
 - anti-snipe default if still configured on-chain
 - unaudited warning
 - creator = the submitting Bankr wallet (`msg.sender`)
