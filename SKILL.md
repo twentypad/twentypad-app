@@ -32,6 +32,7 @@ Contracts are unaudited. Use at the user's own risk. State that in the confirmat
 | Launchpad factory | `0x15a3f3ABb733868d193b511dd5b91f82ebF888A3` |
 | ETH quote | `0x0000000000000000000000000000000000000000` |
 | USDC quote | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| NVDAc quote | `0xb20000000000000000000078ee7ce2fE4908108C` |
 | B20 protocol factory | `0xB20f000000000000000000000000000000000000` |
 | Uniswap v4 PoolManager | `0x498581fF718922c3f8e6A244956aF099B2652b2b` |
 
@@ -48,7 +49,7 @@ One transaction through `createLaunch`:
 1. Creates a fixed-supply B20 (ASSET variant, 18 decimals) via Base's native B20 factory.
 2. Mints **1,000,000,000** tokens to the launch hook.
 3. Renounces mint / admin on the token.
-4. Opens a Uniswap v4 pool (`fee = 0`, `tickSpacing = 200`) against ETH or USDC.
+4. Opens a Uniswap v4 pool (`fee = 0`, `tickSpacing = 200`) against ETH, USDC or NVDAc.
 5. Seeds **single-sided** liquidity (launch token only) at about **$4,000** opening FDV.
 6. Locks that position in the hook (no LP withdraw, no extra LP from others).
 7. Charges a **1%** swap fee in the paired asset, split **70% creator / 30% platform**.
@@ -64,6 +65,7 @@ One transaction through `createLaunch`:
 ```
 @bankrbot launch B20 called {name} ticker {symbol} pair ETH
 @bankrbot launch B20 called {name} ticker {symbol} pair USDC
+@bankrbot launch B20 called {name} ticker {symbol} pair NVDAc
 @bankrbot deploy b20 {name} symbol {symbol} on ETH
 @bankrbot create twentypad b20 {name} / {symbol}
 launch a B20 named {name} ticker {symbol}
@@ -75,20 +77,20 @@ launch a B20 named {name} ticker {symbol}
 | --- | --- | --- |
 | `name` | yes | — |
 | `symbol` | no | uppercase alphanumeric from the name, 3–8 chars |
-| `quote` | no | ETH (`address(0)`) unless the user says USDC |
+| `quote` | no | ETH (`address(0)`) unless the user says USDC or NVDAc |
 | `image` | no | `""` |
 | `description` | no | `""` |
 | `website` | no | `""` |
 | `twitter` | no | `""` |
 | `telegram` | no | `""` |
 | `discord` | no | `""` |
-| `editable` | no | `false` unless the user wants to update metadata later |
+| `editable` | no | `true` |
 
 If `name` is missing, ask once. Do not invent a name.
 
-If they request any quote other than ETH or USDC, first read `quotes(quote)` on the factory. If `registered` is false, refuse.
+If they request any quote other than ETH, USDC or NVDAc, first read `quotes(quote)` on the factory. If `registered` is false, refuse.
 
-Refuse custom supply, custom ticks, extra ETH/USDC sent into the pool, or bonding-curve launches. This factory does not support those.
+Refuse custom supply, custom ticks, extra ETH/USDC/NVDAc sent into the pool, or bonding-curve launches. This factory does not support those.
 
 ## Workflow
 
@@ -136,13 +138,12 @@ Never grind salts inside the user's `createLaunch` transaction.
 Reply with:
 
 - name and symbol
-- pair (ETH or USDC)
+- pair (ETH, USDC or NVDAc)
 - predicted token address
 - salt as `0x` + 64 hex chars
 - opening size: ~$4k FDV, 1B supply, locked single-sided v4 LP
 - fee: 1% swap, 70% creator / 30% platform
 - anti-snipe default if still configured on-chain
-- unaudited warning
 - creator = the submitting Bankr wallet (`msg.sender`)
 
 If the request came from X and required fields were complete, confirm briefly in the reply, then submit.
@@ -249,7 +250,7 @@ Reply with:
 - tx hash
 - Basescan token link: `https://basescan.org/token/{token}`
 - Basescan tx link
-- pair (ETH or USDC)
+- pair (ETH, USDC or NVDAc)
 - poolId
 - creator address
 - twentypad.com
@@ -337,7 +338,7 @@ Reply with:
 ## What this skill does not do
 
 - Does not launch Clanker, Doppler, or generic ERC-20 tokens
-- Does not send ETH or USDC into the pool
+- Does not send ETH, USDC or NVDAc into the pool
 - Does not change `tokenSuffix` or fee defaults (owner-only)
 - Does not claim fees from the fee escrow
 - Does not update profiles unless the user is `tokenCreator` and `editable` is true (`updateProfile`)
@@ -350,6 +351,10 @@ Reply with:
 
 ```
 @bankrbot deploy b20 BlueCube symbol BLUE pair USDC
+```
+
+```
+@bankrbot launch b20 BlueCube symbol CUBE pair NVDAc
 ```
 
 ```
